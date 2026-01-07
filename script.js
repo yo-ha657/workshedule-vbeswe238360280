@@ -4,22 +4,30 @@ fetch(CSV_URL)
   .then(res => res.text())
   .then(text => {
     const rows = text.trim().split('\n').slice(1);
-    const today = new Date().toISOString().slice(0,10);
 
     rows.forEach(row => {
       const [date, dayType, start, end, confirmed, note] =
-        row.split(',').map(v => v.replace(/"/g, ''));
+        row.split(',').map(v => v.replace(/"/g, '').trim());
 
       const div = document.createElement('div');
 
+      // 休日
       if (dayType === 'holiday') {
         div.textContent = `🛌 ${date} 休日`;
-      } else {
+      }
+      // 出勤日
+      else {
         const icon = confirmed === '1' ? '✅' : '⏳';
+        const startTime = start || '--:--';
+        const endTime = end || '--:--';
+
         div.textContent =
-          `💼 ${date} ${icon} ${start || '--'}〜${end || '--'} ${note || ''}`;
+          `💼 ${date} ${icon} ${startTime}〜${endTime} ${note || ''}`;
       }
 
       document.getElementById('schedule').appendChild(div);
     });
+  })
+  .catch(err => {
+    console.error('CSVの読み込みに失敗しました', err);
   });
